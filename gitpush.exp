@@ -1,0 +1,22 @@
+#!/usr/bin/expect -f
+
+set timeout 120
+set username DouglasOY
+set password xxxxxxxx
+
+spawn git push
+
+expect {
+-re ".*sername for 'https://github.com'.*" {
+    exp_send "$username\r"
+    }
+}
+
+expect {
+-re ".*assword for 'https://DouglasOY@github.com'.*" {
+    exp_send "$password\r"
+    }
+}
+
+interact
+
