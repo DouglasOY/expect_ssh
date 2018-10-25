@@ -1,0 +1,67 @@
+#!/usr/bin/expect -f
+
+if { $argc != 1 } {
+    puts "usage: $argv0 hostname"
+    exit 1
+} else {
+    set host [lindex $argv 0]
+}
+
+set timeout 5
+set destuser username
+set destpassword 123456
+set destpath "$destuser@$host"
+
+# connect via ssh
+spawn ssh -o ConnectTimeout=5 $destpath
+
+#######################
+expect {
+-re ".*yes/no.*" {
+    exp_send "yes\r"
+    exp_continue
+    }
+-re ".*assword.*" {
+    exp_send "$destpassword\r"
+    }
+timeout {
+    puts "\n1_timeout\n"
+    exit 1
+    }
+}
+
+expect {
+-re ".*#.*" {
+    exp_send "echo OOKK\r"
+    }
+timeout {
+    puts "\n2_timeout\n"
+    exit 1
+    }
+}
+
+set ret 1
+expect {
+-re "OOKK" {
+    set ret 0
+    }
+timeout {
+    puts "\n3_timeout\n"
+    exit 1
+    }
+}
+
+expect {
+-re ".*#.*" {
+    exp_send "exit\r"
+    }
+}
+
+interact
+
+# puts "\nreturn value of ssh login is $ret \n"
+if {$ret == 0} {
+    exit 0
+} else {
+    exit 1
+}
